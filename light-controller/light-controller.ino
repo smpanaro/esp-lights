@@ -15,7 +15,6 @@ char ssid[] = "ssid";
 char pass[] = "pass";  
 char mdns_name[] = "steves_esp";
 
-WiFiServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
 // Forward declarations
@@ -37,8 +36,6 @@ void setup() {
 
 void loop() {
   webSocket.loop();
-
-  delay(1000);
 }
 
 void setupWebsockets() {
@@ -65,6 +62,8 @@ void handleWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t 
         case WStype_TEXT:
             Serial.println("Get text");
 
+            Serial.println((char*)payload);
+
             // send message to client
             // webSocket.sendTXT(num, "message here");
 
@@ -85,7 +84,7 @@ void connectToWifi() {
   Serial.println(ssid);
 
   WiFi.mode(WIFI_STA);
-  
+
   WiFi.begin(ssid, pass);
   
   while (WiFi.status() != WL_CONNECTED) {
