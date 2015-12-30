@@ -11,8 +11,8 @@
 #include <WebSocketsServer.h>
 
 // Constants
-char ssid[] = "ssid";
-char pass[] = "pass";  
+char ssid[] = "YOUR_SSID_HERE";
+char pass[] = "YOUR_PASSWORD_HERE";  
 char mdns_name[] = "steves_esp";
 
 WebSocketsServer webSocket = WebSocketsServer(81);

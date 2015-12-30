@@ -1,39 +1,36 @@
-import websocket
+import socket
 import time
 
-WEBSOCKET_HOST="YOUR_ESP_IP_ADDRESS"
-WEBSOCKET_URL="ws://{host}:81".format(WEBSOCKET_HOST)
-
-# ws = websocket.WebSocket()
-# ws.connect(WEBSOCKET_URL)
+LIGHT_IP="172.16.0.97"
+LIGHT_PORT=9090
+NUM_LEDS = 60 # Used for validation.
 
 class Color(object):
-   def __init__(self, r, g, b):
-       self._color = (r,g,b)
+  def __init__(self, r, g, b):
+    self._color = (r,g,b)
+    self.r = r
+    self.g = g
+    self.b = b
 
-def safely_send_colors(colors, retry=0):
-  RETRY_SLEEP_SECS = 1
-  MAX_RETRIES = 5
+  def __len__(self):
+    return len(self._color)
 
+  def __iter__(self):
+    for c in self._color:
+      yield c
+
+def safely_send_colors(colors):
   if not _colors_are_valid(colors):
     return
 
   LEADER="colors:"
-  to_send = "{}{}".format(LEADER, _color_list_to_string(colors))
-  try:
-    ws.send(to_send)
-  except Exception, e:
-    if retry == MAX_RETRIES:
-      print "Failed to send colors."
-      raise e
-    else:
-      print "Failed, retrying #{} after {} seconds".format(retry, RETRY_SLEEP_SECS*retry)
-      time.sleep(RETRY_SLEEP_SECS*retry)
-      safely_send_colors(colors, retry=retry+1)
-      return
+  message = "{}{}".format(LEADER, _color_list_to_string(colors))
+
+  sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  sock.sendto(message, (LIGHT_IP, LIGHT_PORT))
+
 
 def _colors_are_valid(colors):
-  NUM_LEDS = 60
   if len(colors) != NUM_LEDS:
     print "Not sending: wrong number of LEDs: {}".format(len(colors))
     return False
@@ -50,5 +47,11 @@ def _colors_are_valid(colors):
 def _color_list_to_string(colors):
   b_arr = bytearray([])
   for c in colors:
-    bytearray.extend(c)
+    b_arr.append(c.r)
+    b_arr.append(c.g)
+    b_arr.append(c.b)
   return str(b_arr)
+
+if __name__ == '__main__':
+  colors = [Color(100,101,102), Color(1,2,3)]
+  safely_send_colors(colors)
