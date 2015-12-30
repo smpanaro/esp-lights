@@ -53,5 +53,7 @@ def _color_list_to_string(colors):
   return str(b_arr)
 
 if __name__ == '__main__':
-  colors = [Color(100,101,102), Color(1,2,3)]
+  colors = []
+  for _ in range(0, NUM_LEDS):
+    colors.append(Color(30,30,30))
   safely_send_colors(colors)
