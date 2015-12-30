@@ -9,19 +9,22 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
+#include <ws2812_i2s.h>
 
 WiFiUDP udp;
 
-// Network Constants
+// Network
 char ssid[] = "YOUR_SSID_HERE";
 char pass[] = "YOUR_PASSWORD_HERE";  
 char mdns_name[] = "steves_esp";
 char UDP_PORT = 9090;
 
-// Light Constants
-const int NUM_LEDS = 60; // Also used by protocol.
+// Lights
+const int NUM_LEDS = 60;
+static WS2812 led_strip;
+static Pixel_t pixels[NUM_LEDS];
 
-// Protocol Constants
+// Protocol
 byte LEADER[] = "colors:";
 const int LEADER_LEN = 7;
 const int PACKET_SIZE = (NUM_LEDS*3) + LEADER_LEN;
@@ -32,6 +35,8 @@ void connectToWifi();
 void advertiseMdns();
 void setupUdpListening();
 int getPacket();
+void setupLeds();
+void updatePixelArray();
 
 void setup() {
   Serial.begin(115200);
@@ -42,32 +47,64 @@ void setup() {
   connectToWifi();
   advertiseMdns();
   setupUdpListening();
+//  setupLeds();
 }
 
 void loop() {
   if (getPacket()) {
     Serial.println("New packet: ");
     Serial.println((char*)packet_buffer);
+    // updatePixelArray();
+  }
+
+//  led_strip.show(pixels); // KEEP DISABLED UNTIL CONFIRM PACKET_BUFFER + PIXELS BUFFER ARE GOOD.
+//  delay(10); // Like in the LED example code.
+}
+
+void updatePixelArray() {
+  for(int i = LEADER_LEN; i < PACKET_SIZE; i += 3) {
+    pixels[i].R = packet_buffer[i];
+    pixels[i].G = packet_buffer[i+1];
+    pixels[i].B = packet_buffer[i+2];
   }
 }
 
-int packetIsValid() {
+void setupLeds() {
+  led_strip.init(NUM_LEDS);
+  for (int i = 0; i < LEADER_LEN; i++) {
+    packet_buffer[i] = LEADER[i];
+  }
+  for (int i = LEADER_LEN; i < PACKET_SIZE; i++) {
+    packet_buffer[i] = 30; // dull white?
+  }
+}
+
+int packetIsValid(byte* packet) {
   // Packet starts with leader.
   for (int i = 0; i < LEADER_LEN; i++) {
-    if (LEADER[i] != packet_buffer[i]) { return 0; }
+    if (LEADER[i] != packet[i]) { return 0; }
   }
   // A byte is only 8 bits - it must be in the valid color range.
   return 1;
 }
 
 int getPacket() {
+  byte temp_buffer[PACKET_SIZE];
   int packet_length = udp.parsePacket();
 
   if (!packet_length) { return 0; }
   if (packet_length != PACKET_SIZE) { return 0; }
 
-  udp.read(packet_buffer, PACKET_SIZE);
-  return packetIsValid();
+  udp.read(temp_buffer, PACKET_SIZE);
+
+  if (packetIsValid(temp_buffer)) {
+    byte* dest = packet_buffer;
+    byte* src = temp_buffer;
+    memcpy(dest, src, PACKET_SIZE);
+    return 1;
+  }
+
+  return 0;
 }
 
 // Setup
