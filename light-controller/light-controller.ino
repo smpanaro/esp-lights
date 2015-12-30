@@ -8,20 +8,30 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#include <WebSocketsServer.h>
+#include <WiFiUdp.h>
 
-// Constants
+WiFiUDP udp;
+
+// Network Constants
 char ssid[] = "YOUR_SSID_HERE";
 char pass[] = "YOUR_PASSWORD_HERE";  
 char mdns_name[] = "steves_esp";
+char UDP_PORT = 9090;
 
-WebSocketsServer webSocket = WebSocketsServer(81);
+// Light Constants
+const int NUM_LEDS = 60; // Also used by protocol.
+
+// Protocol Constants
+byte LEADER[] = "colors:";
+const int LEADER_LEN = 7;
+const int PACKET_SIZE = (NUM_LEDS*3) + LEADER_LEN;
+byte packet_buffer[PACKET_SIZE];
 
 // Forward declarations
 void connectToWifi();
 void advertiseMdns();
-void setupWebsockets();
-void handleWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length);
+void setupUdpListening();
+int getPacket();
 
 void setup() {
   Serial.begin(115200);
@@ -31,54 +41,36 @@ void setup() {
 
   connectToWifi();
   advertiseMdns();
-  setupWebsockets();
+  setupUdpListening();
 }
 
 void loop() {
-  webSocket.loop();
+  if (getPacket()) {
+    Serial.println("New packet: ");
+    Serial.println((char*)packet_buffer);
+  }
 }
 
-void setupWebsockets() {
-  Serial.println("Setting up websockets");
-  webSocket.begin();
-  webSocket.onEvent(handleWebSocketEvent);
-  Serial.println("Set up.");
+int packetIsValid() {
+  // Packet starts with leader.
+  for (int i = 0; i < LEADER_LEN; i++) {
+    if (LEADER[i] != packet_buffer[i]) { return 0; }
+  }
+  // A byte is only 8 bits - it must be in the valid color range.
+  return 1;
 }
 
-void handleWebSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+int getPacket() {
+  int packet_length = udp.parsePacket();
 
-    switch(type) {
-        case WStype_DISCONNECTED:
-            Serial.println("Disconnected!");
-            break;
-        case WStype_CONNECTED: {
-            IPAddress ip = webSocket.remoteIP(num);
-            Serial.println("Connected");
+  if (!packet_length) { return 0; }
+  if (packet_length != PACKET_SIZE) { return 0; }
 
-            // send message to client
-            webSocket.sendTXT(num, "Connected");
-        }
-            break;
-        case WStype_TEXT:
-            Serial.println("Get text");
-
-            Serial.println((char*)payload);
-
-            // send message to client
-            // webSocket.sendTXT(num, "message here");
-
-            // send data to all connected clients
-            // webSocket.broadcastTXT("message here");
-            break;
-        case WStype_BIN:
-            Serial.println("get bin");
-
-            // send message to client
-            // webSocket.sendBIN(num, payload, lenght);
-            break;
-    }
+  udp.read(packet_buffer, PACKET_SIZE);
+  return packetIsValid();
 }
 
+// Setup
 void connectToWifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -104,5 +96,12 @@ void advertiseMdns() {
   }
   Serial.println("Set up mdns: ");
   Serial.println(mdns_name);
+}
+
+void setupUdpListening() {
+  Serial.println("Starting UDP");
+  udp.begin(UDP_PORT);
+  Serial.print("Local port: ");
+  Serial.println(udp.localPort());
 }
 
