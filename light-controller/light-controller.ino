@@ -14,21 +14,21 @@
 WiFiUDP udp;
 
 // Network
-char ssid[] = "YOUR_SSID_HERE";
+char ssid[] = "Home";
 char pass[] = "YOUR_PASSWORD_HERE";  
 char mdns_name[] = "steves_esp";
 const int UDP_PORT = 9090;
 
+#define NUM_LEDS 60
 // Lights
-const int NUM_LEDS = 60;
 static WS2812 led_strip;
 static Pixel_t pixels[NUM_LEDS];
 
 // Protocol
-byte LEADER[] = "colors:";
+static byte LEADER[] = "colors:";
 const int LEADER_LEN = 7;
 const int PACKET_SIZE = (NUM_LEDS*3) + LEADER_LEN;
-byte packet_buffer[PACKET_SIZE];
+static byte packet_buffer[PACKET_SIZE];
 
 // Forward declarations
 void connectToWifi();
@@ -44,28 +44,29 @@ void setup() {
   Serial.println();
   Serial.println();
 
-  connectToWifi();
-  advertiseMdns();
-  setupUdpListening();
-//  setupLeds();
+//  connectToWifi();
+//  advertiseMdns();
+//  setupUdpListening();
+  setupLeds();
 }
 
 void loop() {
-  if (getPacket()) {
-    Serial.println("New packet: ");
-    Serial.println((char*)packet_buffer);
-    // updatePixelArray();
-  }
+//  if (getPacket()) {
+//    Serial.println("New packet: ");
+//    Serial.println((char*)packet_buffer);
+//    // updatePixelArray();
+//  }
 
-//  led_strip.show(pixels); // KEEP DISABLED UNTIL CONFIRM PACKET_BUFFER + PIXELS BUFFER ARE GOOD.
-//  delay(10); // Like in the LED example code.
+  led_strip.show(pixels);
+  delay(10); // Like in the LED example code.
 }
 
 void updatePixelArray() {
-  for(int i = LEADER_LEN; i < PACKET_SIZE; i += 3) {
-    pixels[i].R = packet_buffer[i];
-    pixels[i].G = packet_buffer[i+1];
-    pixels[i].B = packet_buffer[i+2];
+  int pixel_index = 0;
+  for(int i = LEADER_LEN; i < PACKET_SIZE; i += 3, pixel_index++) {
+    pixels[pixel_index].R = 70; //packet_buffer[i];
+    pixels[pixel_index].G = 0; //packet_buffer[i+1];
+    pixels[pixel_index].B = 0; //packet_buffer[i+2];
   }
 }
 
@@ -77,6 +78,9 @@ void setupLeds() {
   for (int i = LEADER_LEN; i < PACKET_SIZE; i++) {
     packet_buffer[i] = 30; // dull white?
   }
+  updatePixelArray();
+
+  Serial.println("Initialized LEDs");
 }
 
 int packetIsValid(byte* packet) {
