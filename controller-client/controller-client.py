@@ -1,8 +1,9 @@
 import socket
 import time
+import sys
 
-LIGHT_IP="172.16.0.97"
-LIGHT_PORT=9090
+LIGHT_IP = "YOUR_ESP_IP_ADDRESS"
+LIGHT_PORT = 9090
 NUM_LEDS = 60 # Used for validation.
 
 class Color(object):
@@ -23,12 +24,14 @@ def safely_send_colors(colors):
   if not _colors_are_valid(colors):
     return
 
+  _dangerously_send_colors(colors)
+
+def _dangerously_send_colors(colors):
   LEADER="colors:"
   message = "{}{}".format(LEADER, _color_list_to_string(colors))
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   sock.sendto(message, (LIGHT_IP, LIGHT_PORT))
-
 
 def _colors_are_valid(colors):
   if len(colors) != NUM_LEDS:
@@ -54,6 +57,11 @@ def _color_list_to_string(colors):
 
 if __name__ == '__main__':
   colors = []
-  for _ in range(0, NUM_LEDS):
-    colors.append(Color(30,30,30))
-  safely_send_colors(colors)
+  if len(sys.argv) > 1 and sys.argv[1] == '-t':
+    for _ in range (0, 2):
+      colors.append(Color(100,100,100))
+      _dangerously_send_colors(colors)
+  else:
+    for _ in range(0, NUM_LEDS):
+      colors.append(Color(30,30,30))
+    safely_send_colors(colors)

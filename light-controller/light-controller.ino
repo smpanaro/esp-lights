@@ -17,7 +17,7 @@ WiFiUDP udp;
 char ssid[] = "YOUR_SSID_HERE";
 char pass[] = "YOUR_PASSWORD_HERE";  
 char mdns_name[] = "steves_esp";
-char UDP_PORT = 9090;
+const int UDP_PORT = 9090;
 
 // Lights
 const int NUM_LEDS = 60;
