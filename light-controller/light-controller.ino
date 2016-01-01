@@ -3,13 +3,26 @@
 // 2. Ground GPIO0
 // 3. Turn on
 // 4. Upload sketch
-// 5. Turn off and float GPIO0
-// 6. Turn on and run
+// Sketch will automatically run. Tie GPIO0 to high to run
+// after powering off.
 
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ws2812_i2s.h>
+
+//#define ENABLE_PRINT // Uncomment for serial printing
+#ifndef ENABLE_PRINT
+#define Serial SomeOtherwiseUnusedNameXYZ
+static class {
+public:
+    void begin(...) {}
+    void print(...) {}
+    void println(IPAddress) {}
+    void println(...) {}
+    void flush(...) {}
+} Serial;
+#endif
 
 WiFiUDP udp;
 
@@ -52,9 +65,9 @@ void setup() {
 
 void loop() {
   if (getPacket()) {
-    Serial.println("Got a new packet");
-//    Serial.println((char*)packet_buffer);
-     updatePixelArray();
+    Serial.println("Got a new packet: ");
+    Serial.println((char*)packet_buffer);
+    updatePixelArray();
   }
 
   led_strip.show(pixels);
