@@ -72,7 +72,11 @@ if __name__ == '__main__':
     for _ in range(0, NUM_LEDS):
       colors.append(Color(0,30,0))
     safely_send_colors(colors)
-  else:
+  elif arg == "--red":
     for _ in range(0, NUM_LEDS):
-      colors.append(Color(0,0,30))
+      colors.append(Color(0,0,1))
+    safely_send_colors(colors)
+  elif arg == "--white":
+    for _ in range(0, NUM_LEDS):
+      colors.append(Color(30,30,30))
     safely_send_colors(colors)
