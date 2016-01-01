@@ -14,7 +14,7 @@
 WiFiUDP udp;
 
 // Network
-char ssid[] = "Home";
+char ssid[] = "YOUR_SSID_HERE";
 char pass[] = "YOUR_PASSWORD_HERE";  
 char mdns_name[] = "steves_esp";
 const int UDP_PORT = 9090;
@@ -44,18 +44,18 @@ void setup() {
   Serial.println();
   Serial.println();
 
-//  connectToWifi();
+  connectToWifi();
 //  advertiseMdns();
-//  setupUdpListening();
+  setupUdpListening();
   setupLeds();
 }
 
 void loop() {
-//  if (getPacket()) {
-//    Serial.println("New packet: ");
+  if (getPacket()) {
+    Serial.println("Got a new packet");
 //    Serial.println((char*)packet_buffer);
-//    // updatePixelArray();
-//  }
+     updatePixelArray();
+  }
 
   led_strip.show(pixels);
   delay(10); // Like in the LED example code.
@@ -64,9 +64,9 @@ void loop() {
 void updatePixelArray() {
   int pixel_index = 0;
   for(int i = LEADER_LEN; i < PACKET_SIZE; i += 3, pixel_index++) {
-    pixels[pixel_index].R = 70; //packet_buffer[i];
-    pixels[pixel_index].G = 0; //packet_buffer[i+1];
-    pixels[pixel_index].B = 0; //packet_buffer[i+2];
+    pixels[pixel_index].R = packet_buffer[i];
+    pixels[pixel_index].G = packet_buffer[i+1];
+    pixels[pixel_index].B = packet_buffer[i+2];
   }
 }
 
@@ -76,7 +76,7 @@ void setupLeds() {
     packet_buffer[i] = LEADER[i];
   }
   for (int i = LEADER_LEN; i < PACKET_SIZE; i++) {
-    packet_buffer[i] = 30; // dull white?
+    packet_buffer[i] = 10; // dull white?
   }
   updatePixelArray();
 

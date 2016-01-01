@@ -57,11 +57,22 @@ def _color_list_to_string(colors):
 
 if __name__ == '__main__':
   colors = []
-  if len(sys.argv) > 1 and sys.argv[1] == '-t':
+
+  arg = sys.argv[1] if len(sys.argv) > 1 else None
+
+  if arg == "--bad-packet":
     for _ in range (0, 2):
-      colors.append(Color(100,100,100))
+      colors.append(Color(10,10,10))
       _dangerously_send_colors(colors)
+  elif arg == "--red":
+    for _ in range(0, NUM_LEDS):
+      colors.append(Color(30,0,0))
+    safely_send_colors(colors)
+  elif arg == "--green":
+    for _ in range(0, NUM_LEDS):
+      colors.append(Color(0,30,0))
+    safely_send_colors(colors)
   else:
     for _ in range(0, NUM_LEDS):
-      colors.append(Color(30,30,30))
+      colors.append(Color(0,0,30))
     safely_send_colors(colors)
