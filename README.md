@@ -9,3 +9,13 @@ colors:\[first LED red value\]\[first LED green value\]\[first LED blue value\]\
 
 ## controller-client
 A Python client for converting and sending color lists into UDP packets recognized by the light-controller.
+`server.py`: Runs a server on port 9090 that allows get/set of state, hue, saturation and brightness.
+
+## homebridge-simple-ledstrip
+A plugin for homebridge that enables control of the lights.
+Install with `sudo npm link` in this folder on the machine running homebridge.
+
+## homebridge
+Various configuration files for running homebridge.
+`homebridge`: An init.d script to run homebridge on launch.
+`config.json`: For configuring homebridge accessories. Place in `~/.homebridge/config.json`.
