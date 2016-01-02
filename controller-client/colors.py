@@ -2,6 +2,7 @@ import socket
 import time
 import sys
 
+
 LIGHT_IP = "YOUR_ESP_IP_ADDRESS"
 LIGHT_PORT = 9090
 NUM_LEDS = 60 # Used for validation.
