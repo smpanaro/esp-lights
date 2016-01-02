@@ -1,0 +1,24 @@
+{
+  "bridge": {
+    "name": "Homebridge",
+    "username": "YOUR_HOMEBRIDGE_MAC_ADDRESS",
+    "port": 51826,
+    "pin": "YOUR_HOMEBRIDGE_PIN_(XXX-XX-XXX)"
+  },
+  "platforms": [
+    {
+      "platform": "Nest",
+      "name": "Nest",
+      "username": "YOUR_NEST_EMAIL",
+      "password": "YOUR_NEST_PASSWORD"
+    }
+  ],
+  "accessories": [
+    {
+      "accessory": "LEDStrip",
+      "name": "Lights",
+      "host": "localhost",
+      "port": 9090
+    }
+  ]
+}
