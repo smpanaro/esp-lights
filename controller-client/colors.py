@@ -1,6 +1,7 @@
 import socket
 import time
 import sys
+import colorsys
 
 
 LIGHT_IP = "YOUR_ESP_IP_ADDRESS"
@@ -13,6 +14,13 @@ class Color(object):
     self.r = r
     self.g = g
     self.b = b
+
+  @classmethod
+  def from_hsv(cls, h,s,v):
+    hsv_percents = (h/360.0, s/100.0, v/100.0)
+    rgb_percents = colorsys.hsv_to_rgb(*hsv_percents)
+    rgb_values = tuple([int(c*254) for c in rgb_percents]) # 0 - 254
+    return cls(*rgb_values)
 
   def __len__(self):
     return len(self._color)

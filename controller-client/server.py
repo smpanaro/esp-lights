@@ -4,6 +4,10 @@ import colorsys
 
 from colors import Color, NUM_LEDS, safely_send_colors
 
+# TODO:
+# - Retry in case UDP gets dropped.
+# - iOS app (uneccessary imho)
+
 ON_STATE = "on"
 OFF_STATE = "off"
 VALID_STATES = [ON_STATE, OFF_STATE]

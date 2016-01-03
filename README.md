@@ -10,6 +10,8 @@ colors:\[first LED red value\]\[first LED green value\]\[first LED blue value\]\
 ## controller-client
 A Python client for converting and sending color lists into UDP packets recognized by the light-controller.
 `server.py`: Runs a server on port 9090 that allows get/set of state, hue, saturation and brightness.
+`colors.py`: Contains a color class and a method for sending colors to the light strip.
+`morning.py`: A script that raises the lights from off to a warm-light for a gradual wake up.
 
 ## homebridge-simple-ledstrip
 A plugin for homebridge that enables control of the lights.
