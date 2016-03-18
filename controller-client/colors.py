@@ -3,7 +3,6 @@ import time
 import sys
 import colorsys
 
-
 LIGHT_IP = "YOUR_ESP_IP_ADDRESS"
 LIGHT_PORT = 9090
 NUM_LEDS = 60 # Used for validation.
